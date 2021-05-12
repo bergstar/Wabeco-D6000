@@ -4008,7 +4008,7 @@
   <property name="pyvcpwidth" type="float" value="0.0"/>
   <property name="pyvcpxpos" type="float" value="0.0"/>
   <property name="pyvcpypos" type="float" value="0.0"/>
-  <property name="raise_z_on_toolchange" type="bool" value="False"/>
+  <property name="raise_z_on_toolchange" type="bool" value="True"/>
   <property name="random_toolchanger" type="bool" value="False"/>
   <property name="require_homing" type="bool" value="True"/>
   <property name="restore_joint_position" type="bool" value="False"/>
