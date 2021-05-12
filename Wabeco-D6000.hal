@@ -277,6 +277,6 @@ net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.
 #  ---estop signals---
 
 net estop-out <= iocontrol.0.user-enable-out
-net estop-out => iocontrol.0.emc-enable-in => toolchanger.enable => hm2_7i76e.0.stepgen.02.enable
+net estop-ext => iocontrol.0.emc-enable-in => toolchanger.enable => hm2_7i76e.0.stepgen.02.enable
 
 
