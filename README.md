@@ -1,16 +1,22 @@
-# Install additional packages 
-sudo apt install git build-essential
+## Install dependency 
 
-# Clone repository and create pncconf symlink
-ln -s Wabeco-D6000/Wabeco-D6000.pncconf Wabeco-D6000.pncconf
+### Install additional packages 
+`sudo apt install git build-essential`
 
-# Install toolchanger.comp
-cd Wabeco-D6000/
-sudo halcompile --install toolchanger.comp
+### Clone repository and create pncconf symlink
+`ln -s Wabeco-D6000/Wabeco-D6000.pncconf Wabeco-D6000.pncconf`
+
+### Install toolchanger.comp
+`cd Wabeco-D6000/
+sudo halcompile --install toolchanger.comp`
+
+# Legacy comments
 
 ## From original creator:
 
+[LinuxCNC forum](https://forum.linuxcnc.org/38-general-linuxcnc-questions/40396-boxford-125-lathe-tool-changer-comp-ferror-solved?start=100#188519)
 
+## From original .comp file comments
 
 The 240 should have an index proximity switch signalling each station, but mine was U/S along with a lot of other low voltage components
 My 160 did not have one and as I knew it could be indexed without, I did not replace the expensive Boxford 240 switch
