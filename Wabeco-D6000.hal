@@ -310,11 +310,11 @@ net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.toolchanged
 net tool-number iocontrol.0.tool-prep-number => toolchanger.toolnumber
 net tool-oldnumber iocontrol.0.tool-number => toolchanger.currenttoolnumber
 
-net apos-cmd toolchanger.position-cmd => a-pos-cmd
-net toolchanger-stepgen-fb <= a-pos-fb => toolchanger.stepgen-pos-fb
+net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
+net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 
 #  ---estop signals---
 
 net estop-out <= iocontrol.0.user-enable-out
-net estop-ext <= iocontrol.0.emc-enable-in => toolchanger.enable => a-enable
+net estop-ext <= iocontrol.0.emc-enable-in => toolchanger.enable => hm2_7i76e.0.stepgen.02.enable
