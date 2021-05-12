@@ -1,0 +1,1 @@
+pin+toolchanger.toolchange pin+toolchanger.toolchanged pin+toolchanger.toolnumber pin+toolchanger.position-cmd pin+toolchanger.currenttoolnumber pin+stepgen.2.step pin+stepgen.2.dir pin+stepgen.2.counts pin+toolchanger.jog-back pin+toolchanger.jog-forward pin+toolchanger.jog-move pin+stepgen.2.position-cmd pin+stepgen.2.position-fb sig+adir sig+astep sig+jb sig+jf sig+jm
