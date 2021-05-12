@@ -8,8 +8,9 @@ ln -s Wabeco-D6000/Wabeco-D6000.pncconf Wabeco-D6000.pncconf
 cd Wabeco-D6000/
 sudo halcompile --install toolchanger.comp
 
-
 ## From original creator:
+
+
 
 The 240 should have an index proximity switch signalling each station, but mine was U/S along with a lot of other low voltage components
 My 160 did not have one and as I knew it could be indexed without, I did not replace the expensive Boxford 240 switch
