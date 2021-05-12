@@ -247,6 +247,32 @@ net machine-is-enabled        <=  motion.motion-enabled
 #  AXIS A ATC
 #*******************
 
+
+#*******************
+#  AXIS A JOINT 3
+#*******************
+
+setp   pid.a.Pgain     [JOINT_3]P
+setp   pid.a.Igain     [JOINT_3]I
+setp   pid.a.Dgain     [JOINT_3]D
+setp   pid.a.bias      [JOINT_3]BIAS
+setp   pid.a.FF0       [JOINT_3]FF0
+setp   pid.a.FF1       [JOINT_3]FF1
+setp   pid.a.FF2       [JOINT_3]FF2
+setp   pid.a.deadband  [JOINT_3]DEADBAND
+setp   pid.a.maxoutput [JOINT_3]MAX_OUTPUT
+setp   pid.a.error-previous-target true
+# This setting is to limit bogus stepgen
+# velocity corrections caused by position
+# feedback sample time jitter.
+setp   pid.a.maxerror 0.012700
+
+net a-index-enable  <=> pid.a.index-enable
+net a-enable        =>  pid.a.enable
+net a-pos-cmd       =>  pid.a.command
+net a-pos-fb        =>  pid.a.feedback
+net a-output        <=  pid.a.output
+
 # Step Gen signals/setup
 
 setp   hm2_7i76e.0.stepgen.02.dirsetup        [JOINT_3]DIRSETUP
@@ -259,6 +285,19 @@ setp   hm2_7i76e.0.stepgen.02.control-type     1
 setp   hm2_7i76e.0.stepgen.02.maxaccel         [JOINT_3]STEPGEN_MAXACCEL
 setp   hm2_7i76e.0.stepgen.02.maxvel           [JOINT_3]STEPGEN_MAXVEL
 
+# ---closedloop stepper signals---
+
+net a-pos-cmd    <= joint.3.motor-pos-cmd
+net a-vel-cmd    <= joint.3.vel-cmd
+net a-output     <= hm2_7i76e.0.stepgen.02.velocity-cmd
+net a-pos-fb     <= hm2_7i76e.0.stepgen.02.position-fb
+net a-pos-fb     => joint.3.motor-pos-fb
+net a-enable     <= joint.3.amp-enable-out
+net a-enable     => hm2_7i76e.0.stepgen.02.enable
+
+net astep        <= hm2_7i76e.0.stepgen.02.step
+net adir         <= hm2_7i76e.0.stepgen.02.dir
+
 ###########################################################
 # loading the toolchange component in .hal file
 ###########################################################
@@ -270,14 +309,12 @@ net tool-change-request iocontrol.0.tool-change => toolchanger.toolchange
 net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.toolchanged
 net tool-number iocontrol.0.tool-prep-number => toolchanger.toolnumber
 net tool-oldnumber iocontrol.0.tool-number => toolchanger.currenttoolnumber
-net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 
-net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
-net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
+net apos-cmd toolchanger.position-cmd => a-pos-cmd
+net toolchanger-stepgen-fb <= a-pos-fb => toolchanger.stepgen-pos-fb
+net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 
 #  ---estop signals---
 
 net estop-out <= iocontrol.0.user-enable-out
-net estop-out => iocontrol.0.emc-enable-in => toolchanger.enable => hm2_7i76e.0.stepgen.02.enable
-
-
+net estop-ext <= iocontrol.0.emc-enable-in => toolchanger.enable => a-enable

@@ -1,57 +1,50 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <pyvcp>
-     <vbox>
-         <relief>RIDGE</relief>         
-         <bd>2</bd>
-                <label>
-                        <text>"Spindle Speed:"</text>
-                        <font>("Helvetica",12)</font>
-                </label>
-                <bar>
-                        <halpin>"spindle-speed"</halpin>
-                        <max_>3000</max_>
-                </bar>
+    <vbox>
+        <relief>RIDGE</relief>
+        <bd>2</bd>
+        <label>
+            <text>"Jog ATC"</text>
+            <font>("Helvetica",10)</font>
+        </label>
+        <hbox>
+            <label>
+                <text>" "</text>
+                <font>("Helvetica",10)</font>
+            </label>
+            <button>
+                <font>("Helvetica",8)</font>
+                <width>3</width>
+                <halpin>"jog-back"</halpin>
+                <text>"Back"</text>
+            </button>
+            <label>
+                <text>"  "</text>
+                <font>("Helvetica",10)</font>
+            </label>
+            <button>
+                <font>("Helvetica",8)</font>
+                <width>3</width>
+                <halpin>"jog-forward"</halpin>
+                <text>"Forward"</text>
+            </button>
+            <label>
+                <text>"  "</text>
+                <font>("Helvetica",10)</font>
+            </label>
+            <spinbox>
+                <halpin>"jog-move"</halpin>
+                <width>4</width>
+                <min_>0</min_>
+                <max_>9.99</max_>
+                <resolution>0.01</resolution>
+                <format>"2.2f"</format>
+                <font>("Helvetica",8)</font>
+            </spinbox>
+            <label>
+                <text>" "</text>
+                <font>("Helvetica",10)</font>
+            </label>
+        </hbox>
     </vbox>
-        <vbox>     
-            <vbox>
-                 <relief>RIDGE</relief>         
-                 <bd>2</bd>
-                    <label>
-                            <text>"Jog ATC"</text>
-                            <font>("Helvetica",10)</font>
-                    </label>
-                <hbox>        
-                    <label><text>" "</text><font>("Helvetica",10)</font></label> 
-                    <button>
-                        <font>("Helvetica",8)</font>
-                        <width>3</width>
-                        <halpin>"jog-back"</halpin>
-                        <text>"Back"</text>
-                    </button>
-                    <label><text>"  "</text><font>("Helvetica",10)</font></label> 
-                    <button>
-                        <font>("Helvetica",8)</font>
-                        <width>3</width>
-                        <halpin>"jog-forward"</halpin>
-                        <text>"Forward"</text>
-                    </button>
-                    <label><text>"  "</text><font>("Helvetica",10)</font></label> 
-                    <spinbox>
-                        <halpin>"jog-move"</halpin>
-                        <width>4</width>
-                        <min_>0</min_>
-                        <max_>9.99</max_>
-                        <resolution>0.01</resolution>
-                        <format>"2.2f"</format>
-                        <font>("Helvetica",8)</font>
-                    </spinbox>
-                    <label><text>" "</text><font>("Helvetica",10)</font></label> 
-                </hbox>
-            </vbox>        
-        </vbox>
-        
-    
-       
 </pyvcp>
-
-
