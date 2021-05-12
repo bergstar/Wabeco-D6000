@@ -6,25 +6,3 @@
 # Revision of 09/05/2011  
 ############################################ 
 # The commands in this file are run after the AXIS GUI (including PyVCP panel) starts
-
-# **** Setup of spindle speed and tool number display using pyvcp -START ****
-# **** Use ACTUAL spindle velocity from spindle encoder
-# **** spindle-velocity is signed so we use absolute component to remove sign
-# **** ACTUAL velocity is in RPS not RPM so we scale it.
-
-addf scale.2 servo-thread
-addf abs.2 servo-thread
-
-############################################################################################
-# Jog panel for ATC, move value scaled to give a true relation to degrees moved
-###########################################################################################
-setp scale.2.gain 0.017 
-
-net jf toolchanger.jog-forward <= pyvcp.jog-forward
-net jb toolchanger.jog-back <= pyvcp.jog-back
-
-net jm pyvcp.jog-move => abs.2.in
-net abs_jm <= abs.2.out => scale.2.in
-net scaled-jm <= scale.2.out  => toolchanger.jog-move
-
-################################################################## end
