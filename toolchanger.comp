@@ -101,10 +101,15 @@ FUNCTION(_)
                             
                             while(index < moves)
                                 {
-                                if(bToggle)
+                                if(bToggle) {
+                                    rtapi_print_msg(RTAPI_MSG_ERR, "+ even move");
                                     position_req += even_move;
+                                }
                                 else
+                                {
+                                    rtapi_print_msg(RTAPI_MSG_ERR, "+ odd move");
                                     position_req += odd_move;
+                                }
                                 index++;
                                 bToggle = !bToggle;
                                 }
@@ -172,7 +177,9 @@ FUNCTION(_)
                 toolchanged = 1;   // signal finished
                 break;
 
-        case 10:   break;  // should never get here but if we do then loop endlessly doing nothing
+        case 10:   
+        rtapi_print("Endless loop");
+        break;  // should never get here but if we do then loop endlessly doing nothing
                 
         default:    
                 progress_level = 10;
