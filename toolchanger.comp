@@ -57,18 +57,23 @@ FUNCTION(_)
     switch (progress_level)
         {
         case 0:  
+        rtapi_print_msg(RTAPI_MSG_ERR, "case 0 - idle");
         break;
                 
-        case 1: 
+        case 1:
+        rtapi_print_msg(RTAPI_MSG_ERR, "case 1 - jog forward");
         break;
 
         case 3:
+        rtapi_print_msg(RTAPI_MSG_ERR, "case 3 - jog backwards");
         break;
                
-        case 5: 
+        case 5:
+        rtapi_print_msg(RTAPI_MSG_ERR, "case 5 - clean up");
         break;
 
         case 10:   
+        rtapi_print_msg(RTAPI_MSG_ERR, "case 10 - endless loop");
         break;  
                 
         default:    
