@@ -142,20 +142,20 @@ net z-pos-limit     =>  joint.1.pos-lim-sw-in
 #  AXIS A JOINT 3
 #*******************
 
-setp   pid.a.Pgain     [JOINT_2]P
-setp   pid.a.Igain     [JOINT_2]I
-setp   pid.a.Dgain     [JOINT_2]D
-setp   pid.a.bias      [JOINT_2]BIAS
-setp   pid.a.FF0       [JOINT_2]FF0
-setp   pid.a.FF1       [JOINT_2]FF1
-setp   pid.a.FF2       [JOINT_2]FF2
-setp   pid.a.deadband  [JOINT_2]DEADBAND
-setp   pid.a.maxoutput [JOINT_2]MAX_OUTPUT
-setp   pid.a.error-previous-target true
+# setp   pid.a.Pgain     [JOINT_2]P
+# setp   pid.a.Igain     [JOINT_2]I
+# setp   pid.a.Dgain     [JOINT_2]D
+# setp   pid.a.bias      [JOINT_2]BIAS
+# setp   pid.a.FF0       [JOINT_2]FF0
+# setp   pid.a.FF1       [JOINT_2]FF1
+# setp   pid.a.FF2       [JOINT_2]FF2
+# setp   pid.a.deadband  [JOINT_2]DEADBAND
+# setp   pid.a.maxoutput [JOINT_2]MAX_OUTPUT
+# setp   pid.a.error-previous-target true
 # This setting is to limit bogus stepgen
 # velocity corrections caused by position
 # feedback sample time jitter.
-setp   pid.a.maxerror 0.012700
+# setp   pid.a.maxerror 0.012700
 
 # net a-index-enable  <=> pid.a.index-enable
 # net a-enable        =>  pid.a.enable
@@ -307,3 +307,16 @@ net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
 net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
 
 net toolchanger-limit hm2_7i76e.0.7i76.0.0.input-02 => toolchanger.atc-limit
+
+loadrt or2 count=1
+loadrt and2 count=1
+addf or2.0 servo-thread
+addf and2.0 servo-thread
+
+net x-homing or2.0.in0 <= joint.0.homing
+net z-homing or2.0.in1 <= joint.1.homing
+net axis-homing or2.0.out => toolchanger.axis-homing
+
+net x-homed and2.0.in0 <= joint.0.homed
+net z-homed and2.0.in1 <= joint.1.homed
+net axis-homed and2.0.out => toolchanger.axis-homed

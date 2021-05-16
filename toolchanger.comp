@@ -61,8 +61,6 @@ FUNCTION(_)
 {	
     if( axis_homing ) event = RESET;
 
-    if ( atc_limit ) rtapi_print_msg("atc limit triggered : " "%f\n", atc_limit);
-
     switch(state) {
         case PREPARE:
             if( axis_homed ) event = PREPARE_HOMED;
@@ -113,7 +111,7 @@ FUNCTION(_)
             event = HOMING_FINISH;
             break;
         case HOMING_FINISH:
-            rtapi_print_msg(RTAPI_MSG_ERR, "Homed");            
+            rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
             homed = true;
             event = DEFAULT;
             break;
