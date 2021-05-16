@@ -8,6 +8,22 @@ pin in bit atc_limit	    			"ATC limit switch";
 pin out float position_cmd          	"Sends location required";
 pin out float velocity_cmd          	"Sends location required";
 
+// allow parameters to be changed by setp for fine tuning
+param rw float position_move = 43 	     	"distance from odd tool station to even one";
+param rw float clear_move = 5			"additional move to ensure clearing the pawl";
+param rw float lock_move = 9        	"backward move to ensure locking";
+param rw float lock_delay = 100         "delay before lock back, very roughly in ms";
+
+// internal variables
+
+variable int progress_level = 0;    	// tracks the progress of the toolchange
+variable int moves = 0;             	// number of moves to reach tool station  
+variable int index = 0;             	// Counter used for comparison with moves
+variable bool bEven = false;        	// Odd or Even station requested
+variable bool bToggle = false;      	// Status of current move as Odd or Even
+variable float position_req = 0;    	// Where we want to be
+variable float position_accum = 0;  	// Moves are incremental but stepgen is absolute so add them up
+
 
 pin out bit toolchanged =false      	"Sends signal when tool change finished";
 pin in bit enable = false          		"Toolchanger enable signal";
@@ -103,7 +119,12 @@ FUNCTION(_)
             }
             break;
         case HOMING_START:
-            position_cmd = 10;
+            // check if limit switch is tripped
+            // if it is, release it by moving away
+            if (atc_limit) {
+                position_cmd = 360 + 40;
+            }
+
             if (stepgen_pos_fb > (10 - 0.1)) {
                 event = HOMING_SEARCH;
                 rtapi_print_msg(RTAPI_MSG_ERR, "HOMING_SEARCH");
