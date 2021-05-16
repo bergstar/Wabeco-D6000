@@ -4,8 +4,10 @@ pin in bit toolchange               	"Receives signal from M6 that tool change r
 pin in s32 toolnumber               	"Receives Tx data from M6 (tool number requested) Only allows 1-8";
 pin in s32 currenttoolnumber        	"Receives old tool number";
 pin in float stepgen_pos_fb				"Position-feedback from stepgen";
-pin in bool atc_limit	    			"ATC limit switch";
+pin in bit atc_limit	    			"ATC limit switch";
 pin out float position_cmd          	"Sends location required";
+pin out float velocity_cmd          	"Sends location required";
+
 
 pin out bit toolchanged =false      	"Sends signal when tool change finished";
 pin in bit enable = false          		"Toolchanger enable signal";
@@ -27,7 +29,7 @@ license "GPL";
 #include <stdlib.h>
 #include <unistd.h>
 
-#define HOMING_DELAY 3;
+#define HOMING_DELAY 1;
 
 static bool homing = false; 
 static bool homed = false;
@@ -101,14 +103,29 @@ FUNCTION(_)
             }
             break;
         case HOMING_START:
-			position_cmd = 100;
-            event = HOMING_SEARCH;
+            position_cmd = 10;
+            if (stepgen_pos_fb > (10 - 0.1)) {
+                event = HOMING_SEARCH;
+                rtapi_print_msg(RTAPI_MSG_ERR, "HOMING_SEARCH");
+            }
             break;
         case HOMING_SEARCH:
-            event = HOMING_LATCH;
+            if (!atc_limit) {
+                position_cmd = 360 + 40;
+            } else {
+                position_cmd = stepgen_pos_fb + 1;
+                event = HOMING_LATCH;    
+                rtapi_print_msg(RTAPI_MSG_ERR, "HOMING_LATCH");
+            }
             break;
         case HOMING_LATCH:
-            event = HOMING_FINISH;
+            if (atc_limit) {
+                position_cmd = stepgen_pos_fb + 50;
+            } else {
+                position_cmd = stepgen_pos_fb - 22;
+                event = HOMING_FINISH;
+                rtapi_print_msg(RTAPI_MSG_ERR, "HOMING_FINISH");
+            }
             break;
         case HOMING_FINISH:
             rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
