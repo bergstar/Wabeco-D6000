@@ -8,14 +8,13 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JO
 loadrt hostmot2
 loadrt hm2_eth board_ip="192.168.1.121" config=" num_encoders=1 num_pwmgens=0 num_stepgens=5 sserial_port_0=00xxxx" 
 setp    hm2_7i76e.0.watchdog.timeout_ns 5000000
-loadrt pid names=pid.x,pid.z,pid.a,pid.s
+loadrt pid names=pid.x,pid.z,pid.s
 
 addf hm2_7i76e.0.read          servo-thread
 addf motion-command-handler   servo-thread
 addf motion-controller        servo-thread
 addf pid.x.do-pid-calcs       servo-thread
 addf pid.z.do-pid-calcs       servo-thread
-addf pid.a.do-pid-calcs       servo-thread
 addf pid.s.do-pid-calcs       servo-thread
 addf hm2_7i76e.0.write         servo-thread
 setp hm2_7i76e.0.dpll.01.timer-us -50
@@ -158,11 +157,11 @@ setp   pid.a.error-previous-target true
 # feedback sample time jitter.
 setp   pid.a.maxerror 0.012700
 
-net a-index-enable  <=> pid.a.index-enable
-net a-enable        =>  pid.a.enable
-net a-pos-cmd       =>  pid.a.command
-net a-pos-fb        =>  pid.a.feedback
-net a-output        <=  pid.a.output
+# net a-index-enable  <=> pid.a.index-enable
+# net a-enable        =>  pid.a.enable
+# net a-pos-cmd       =>  pid.a.command
+# net a-pos-fb        =>  pid.a.feedback
+# net a-output        <=  pid.a.output
 
 # Step Gen signals/setup
 
@@ -172,25 +171,25 @@ setp   hm2_7i76e.0.stepgen.02.steplen         [JOINT_2]STEPLEN
 setp   hm2_7i76e.0.stepgen.02.stepspace       [JOINT_2]STEPSPACE
 setp   hm2_7i76e.0.stepgen.02.position-scale  [JOINT_2]STEP_SCALE
 setp   hm2_7i76e.0.stepgen.02.step_type        0
-setp   hm2_7i76e.0.stepgen.02.control-type     1
+setp   hm2_7i76e.0.stepgen.02.control-type     0
 setp   hm2_7i76e.0.stepgen.02.maxaccel         [JOINT_2]STEPGEN_MAXACCEL
 setp   hm2_7i76e.0.stepgen.02.maxvel           [JOINT_2]STEPGEN_MAXVEL
 
 # ---closedloop stepper signals---
 
-net a-pos-cmd    <= joint.2.motor-pos-cmd
-net a-vel-cmd    <= joint.2.vel-cmd
-net a-output     <= hm2_7i76e.0.stepgen.02.velocity-cmd
-net a-pos-fb     <= hm2_7i76e.0.stepgen.02.position-fb
-net a-pos-fb     => joint.2.motor-pos-fb
-net a-enable     <= joint.2.amp-enable-out
-net a-enable     => hm2_7i76e.0.stepgen.02.enable
+# net a-pos-cmd    <= joint.2.motor-pos-cmd
+# net a-vel-cmd    <= joint.2.vel-cmd
+# net a-output     <= hm2_7i76e.0.stepgen.02.velocity-cmd
+# net a-pos-fb     <= hm2_7i76e.0.stepgen.02.position-fb
+# net a-pos-fb     => joint.2.motor-pos-fb
+# net a-enable     <= joint.2.amp-enable-out
+# net a-enable     => hm2_7i76e.0.stepgen.02.enable
 
 # ---setup home / limit switch signals---
 
-net home-a     =>  joint.2.home-sw-in
-net a-neg-limit     =>  joint.2.neg-lim-sw-in
-net a-pos-limit     =>  joint.2.pos-lim-sw-in
+# net home-a     =>  joint.2.home-sw-in
+# net a-neg-limit     =>  joint.2.neg-lim-sw-in
+# net a-pos-limit     =>  joint.2.pos-lim-sw-in
 
 #*******************
 #  SPINDLE
@@ -303,3 +302,8 @@ net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.toolchanged
 net tool-number iocontrol.0.tool-prep-number => toolchanger.toolnumber
 net tool-oldnumber iocontrol.0.tool-number => toolchanger.currenttoolnumber
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
+
+net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
+net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
+
+net toolchanger-limit hm2_7i76e.0.7i76.0.0.input-02 => toolchanger.atc-limit
