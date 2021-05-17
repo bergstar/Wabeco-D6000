@@ -34,7 +34,7 @@ license "GPL";
 
 #define TOOL_MOVE 50;
 #define CLEAR_MOVE 5;
-#define LOCK_MOVE 15;
+#define LOCK_MOVE 22;
 
 static bool homing = false;
 static bool homed = false;
