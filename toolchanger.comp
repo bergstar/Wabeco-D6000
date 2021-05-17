@@ -127,12 +127,16 @@ FUNCTION(_) {
 
       homed = true;
 
-      event = DEFAULT;
+      event = CHANGE_TOOL;
 
       rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
     }
     break;
   case CHANGE_TOOL:
+    // 0.01 slow
+    // 0.005 ultra slow
+    // 0.03 max
+    position_cmd += 0.03;
     break;
   case CHANGE_ADVANCE:
     break;
