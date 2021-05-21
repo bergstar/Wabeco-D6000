@@ -10,9 +10,8 @@ pin out float position_cmd "Sends location required";
 pin out bit toolchanged = false "Sends signal when tool change finished";
 pin in bit enable = false "Toolchanger enable signal";
 
-pin in bit jog_forward = false "Facilitate jogging of stepgen via component";
-pin in bit jog_back = false "Facilitate jogging of stepgen via component";
-pin in float jog_move = 0 "distance to jog";
+variable float position_req = 0;    	// Where we want to be
+variable float position_accum = 0;  	// Moves are incremental but stepgen is absolute so add them up
 
 pin in bit axis_homing;
 pin in bit axis_homed;
@@ -132,15 +131,21 @@ FUNCTION(_) {
     }
     break;
   case CHANGE_TOOL:
-
-    // 0.01 slow
-    // 0.005 ultra slow
-    // 0.03 max
-    position_cmd += 0.03;
+    position_req = stepgen_pos_fb + 50;
+    event = CHANGE_ADVANCE;
     break;
   case CHANGE_ADVANCE:
+    if ( stepgen_pos_fb < position_req ) {
+      position_cmd += 0.03;
+    }
+
+    if ( stepgen_pos_fb >= position_req ) {
+      event = CHANGE_LOCK;
+    }
     break;
   case CHANGE_LOCK:
+        rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
+
     break;
   default:
     break;
