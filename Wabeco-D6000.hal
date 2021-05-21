@@ -300,7 +300,6 @@ net tool-oldnumber iocontrol.0.tool-number => toolchanger.currenttoolnumber
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 
 net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
-net apos-vlc toolchanger.velocity-cmd => hm2_7i76e.0.stepgen.02.velocity-cmd
 net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
 
 #  ---estop signals---

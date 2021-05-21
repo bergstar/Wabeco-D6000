@@ -30,9 +30,9 @@ license "GPL";
 #define HOMING_DELAY 1;
 #define LOCKING_DELAY 1;
 
-#define TOOL_MOVE 50;
+#define TOOL_MOVE 45;
 #define CLEAR_MOVE 5;
-#define LOCK_MOVE 22;
+#define LOCK_MOVE 23;
 
 static bool homing = false;
 static bool homed = false;
@@ -131,21 +131,35 @@ FUNCTION(_) {
     }
     break;
   case CHANGE_TOOL:
-    position_req = stepgen_pos_fb + 50;
+    position_req = stepgen_pos_fb + 52;
     event = CHANGE_ADVANCE;
     break;
   case CHANGE_ADVANCE:
     if ( stepgen_pos_fb < position_req ) {
-      position_cmd += 0.03;
+      if ( stepgen_pos_fb < position_req - 5 ) {
+        position_cmd += 0.03;
+      } else {
+        position_cmd += 0.02;
+      }      
     }
-
     if ( stepgen_pos_fb >= position_req ) {
+      position_req = stepgen_pos_fb - 7.25;
       event = CHANGE_LOCK;
     }
     break;
   case CHANGE_LOCK:
-        rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
+    if ( stepgen_pos_fb > position_req ) {
+      if ( ( position_req - stepgen_pos_fb ) < 5 ) {
+        position_cmd -= 0.005;
+      } else {
+        position_cmd -= 0.001;
+      }
+      
+    }
 
+    if ( stepgen_pos_fb <= position_req ) {
+      event = CHANGE_TOOL;
+    }
     break;
   default:
     break;
