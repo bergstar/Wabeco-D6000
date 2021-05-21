@@ -6,7 +6,6 @@ pin in s32 currenttoolnumber "Receives old tool number";
 pin in float stepgen_pos_fb "Position-feedback from stepgen";
 pin in bit atc_limit "ATC limit switch";
 pin out float position_cmd "Sends location required";
-pin out float velocity_cmd "Sends location required";
 
 pin out bit toolchanged = false "Sends signal when tool change finished";
 pin in bit enable = false "Toolchanger enable signal";
@@ -133,6 +132,7 @@ FUNCTION(_) {
     }
     break;
   case CHANGE_TOOL:
+
     // 0.01 slow
     // 0.005 ultra slow
     // 0.03 max
