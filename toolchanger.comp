@@ -8,6 +8,7 @@ pin in s32 tool_requested "Receives Tx data from M6 (tool number requested) Only
 pin in s32 tool_current "Receives old tool number";
 pin out s32 tool_physical = 0; // Reflects current locked tool in ATC
 pin out s32 tool_target = 0; // Reflects requested tool number
+pin out s32 tool_locking = false; // Indicates that tool is about to get locked
 
 pin in bit atc_limit "ATC limit switch";
 
@@ -115,8 +116,6 @@ FUNCTION(_) {
     if (atc_limit) {
       position_cmd = 25;
     } else {
-      position_cmd = position_fb + 5;
-
       event = HOMING_SEARCH;
     }
     break;
@@ -126,7 +125,7 @@ FUNCTION(_) {
     if (!atc_limit) {
       position_cmd = 360 + 50;
     } else {
-      position_cmd = position_fb + 5;
+      position_cmd = position_fb + LATCHING_MOVE;
 
       event = HOMING_LATCH;
     }
@@ -137,6 +136,8 @@ FUNCTION(_) {
     if (atc_limit) {
       position_cmd += 1;
     } else {
+      tool_locking = true;
+      
       position_cmd = position_fb - 23;
       if (delay == false) {
         timer = LOCKING_DELAY;
@@ -155,7 +156,9 @@ FUNCTION(_) {
       delay = false;
 
       homed = true;
-
+      
+      tool_locking = false;
+      
       tool_physical = 2;
 
       rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
@@ -184,8 +187,12 @@ FUNCTION(_) {
       // current tool is the tool requested
       tool_changed = true;
       tool_target = 0;
+      tool_locking = false;
       event = DEFAULT;
     } else {
+      if ( remaining(tool_physical, tool_requested) == 1 ) {
+        tool_locking = true;
+      } 
       // add check for lock move
       event = CHANGE_TOOL;
     }
@@ -228,9 +235,9 @@ FUNCTION(_) {
 
     if ( position_fb <= position_req ) {
       // tool change complete, advance tool counter
-      tool_physical -= 1;
+      tool_physical += 1;
 
-      if ( tool_physical < 1 ) tool_physical = tool_physical + 8;
+      if ( tool_physical > 8 ) tool_physical = tool_physical - 8;
 
       event = CHANGE_PROGRESS;
     }
@@ -241,4 +248,15 @@ FUNCTION(_) {
 
     break;
   }
+}
+
+/* function descripgion */
+int remaining(int current, int target) {
+  int result;
+
+  result = 8 - current + target;
+
+  if ( result > 8 ) result = result - 8;
+ 
+  return result; 
 }
