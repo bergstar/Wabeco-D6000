@@ -35,13 +35,13 @@ license "GPL";
 #define LOCKING_DELAY 1;
 
 #define TOOL_MOVE 52;
-#define LATCHING_LIMIT 5;
+#define LATCHING_MOVE 5
 #define LOCK_MOVE 7.25;
 
-#define STEP_LOCKING = 0.001;
-#define STEP_SLOW = 0.005;
-#define STEP_NORMAL = 0.02;
-#define STEP_FAST = 0.03;
+#define STEP_LOCKING 0.001;
+#define STEP_SLOW 0.005;
+#define STEP_NORMAL 0.02;
+#define STEP_FAST 0.03;
 
 static bool delay = false;
 static float timer;
@@ -113,7 +113,7 @@ FUNCTION(_) {
     if (atc_limit) {
       position_cmd = 25;
     } else {
-      position_cmd = stepgen_pos_fb + 5;
+      position_cmd = position_fb + 5;
 
       event = HOMING_SEARCH;
     }
@@ -124,7 +124,7 @@ FUNCTION(_) {
     if (!atc_limit) {
       position_cmd = 360 + 50;
     } else {
-      position_cmd = stepgen_pos_fb + 5;
+      position_cmd = position_fb + 5;
 
       event = HOMING_LATCH;
     }
@@ -135,7 +135,7 @@ FUNCTION(_) {
     if (atc_limit) {
       position_cmd += 1;
     } else {
-      position_cmd = stepgen_pos_fb - 23;
+      position_cmd = position_fb - 23;
       if (delay == false) {
         timer = LOCKING_DELAY;
         delay = true;
@@ -175,23 +175,23 @@ FUNCTION(_) {
 
   case CHANGE_TOOL:
 
-    position_req = stepgen_pos_fb + TOOL_MOVE;
+    position_req = position_fb + TOOL_MOVE;
     event = CHANGE_ADVANCE;
 
     break;
 
   case CHANGE_ADVANCE:
 
-    if ( stepgen_pos_fb < position_req ) {
-      if ( stepgen_pos_fb < position_req - LATCHING_LIMIT ) {
+    if ( position_fb < position_req ) {
+      if ( position_fb < position_req - LATCHING_MOVE ) {
         position_cmd += STEP_FAST;
       } else {
         position_cmd += STEP_NORMAL;
       }      
     }
 
-    if ( stepgen_pos_fb >= position_req ) {
-      position_req = stepgen_pos_fb - LOCK_MOVE;
+    if ( position_fb >= position_req ) {
+      position_req = position_fb - LOCK_MOVE;
       event = CHANGE_LOCK;
     }
 
@@ -199,15 +199,15 @@ FUNCTION(_) {
 
   case CHANGE_LOCK:
 
-    if ( stepgen_pos_fb > position_req ) {
-      if ( ( position_req - stepgen_pos_fb ) < LATCHING_LIMIT ) {
+    if ( position_fb > position_req ) {
+      if ( ( position_req - position_fb ) < LATCHING_MOVE ) {
         position_cmd -= STEP_SLOW;
       } else {
         position_cmd -= STEP_LOCKING;
       }   
     }
 
-    if ( stepgen_pos_fb <= position_req ) {
+    if ( position_fb <= position_req ) {
       // tool change complete, advance tool counter
       tool_physical -= 1;
 
