@@ -6,7 +6,7 @@ pin in bit tool_change "Receives signal from M6 that tool change required";
 pin out bit tool_changed = false "Sends signal when tool change finished";
 pin in s32 tool_requested "Receives Tx data from M6 (tool number requested) Only allows 1-8";
 pin in s32 tool_current "Receives old tool number";
-variable int tool_physical = 0; // Reflects current locked tool in ATC
+pin out s32  tool_physical = 0; // Reflects current locked tool in ATC
 
 pin in bit atc_limit "ATC limit switch";
 
@@ -154,9 +154,11 @@ FUNCTION(_) {
 
       homed = true;
 
-      tool_physical = 3;
+      tool_physical = 2;
 
       rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
+      
+      event = DEFAULT;
     }
     break;
 

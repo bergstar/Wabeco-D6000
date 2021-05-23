@@ -322,5 +322,4 @@ net x-homed and2.0.in0 <= joint.0.homed
 net z-homed and2.0.in1 <= joint.1.homed
 net axis-homed and2.0.out => toolchanger.axis-homed
 
-net tc-homed-set-tool toolchanger.homed => halui.mdi-command-00
-net tc-homed-set-offset toolchanger.homed => halui.mdi-command-01
+net tc-homed-set-tool toolchanger.homed => halui.mdi-command-00 => halui.mdi-command-00
