@@ -6,7 +6,8 @@ pin in bit tool_change "Receives signal from M6 that tool change required";
 pin out bit tool_changed = false "Sends signal when tool change finished";
 pin in s32 tool_requested "Receives Tx data from M6 (tool number requested) Only allows 1-8";
 pin in s32 tool_current "Receives old tool number";
-pin out s32  tool_physical = 0; // Reflects current locked tool in ATC
+pin out s32 tool_physical = 0; // Reflects current locked tool in ATC
+pin out s32 tool_target = 0; // Reflects requested tool number
 
 pin in bit atc_limit "ATC limit switch";
 
@@ -55,6 +56,7 @@ enum events {
   HOMING_LATCH,
   HOMING_FINISH,
   CHANGE_CONTROL,
+  CHANGE_PROGRESS,
   CHANGE_TOOL,
   CHANGE_ADVANCE,
   CHANGE_LOCK,
@@ -169,7 +171,22 @@ FUNCTION(_) {
       tool_changed = true;
       event = DEFAULT;
     } else {
+      tool_target = tool_requested;
       // lets do some tool changes 
+      event = CHANGE_PROGRESS;
+    }
+
+    break;
+
+  case CHANGE_PROGRESS:
+
+    if ( tool_physical == tool_target ) {
+      // current tool is the tool requested
+      tool_changed = true;
+      tool_target = 0;
+      event = DEFAULT;
+    } else {
+      // add check for lock move
       event = CHANGE_TOOL;
     }
 
