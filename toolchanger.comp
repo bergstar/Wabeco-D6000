@@ -1,25 +1,29 @@
 component toolchanger "This component controls the Boxford 240 Lathe Auto Tool ";
 
-pin in bit toolchange "Receives signal from M6 that tool change required";
-pin in s32 toolnumber "Receives Tx data from M6 (tool number requested) Only allows 1-8";
-pin in s32 currenttoolnumber "Receives old tool number";
-pin in float stepgen_pos_fb "Position-feedback from stepgen";
-pin in bit atc_limit "ATC limit switch";
-pin out float position_cmd "Sends location required";
-
-pin out bit toolchanged = false "Sends signal when tool change finished";
 pin in bit enable = false "Toolchanger enable signal";
 
-variable float position_req = 0;    	// Where we want to be
-variable float position_accum = 0;  	// Moves are incremental but stepgen is absolute so add them up
+pin in bit tool_change "Receives signal from M6 that tool change required";
+pin out bit tool_changed = false "Sends signal when tool change finished";
+pin in s32 tool_requested "Receives Tx data from M6 (tool number requested) Only allows 1-8";
+pin in s32 tool_current "Receives old tool number";
+variable int tool_physical = 0; // Reflects current locked tool in ATC
+
+pin in bit atc_limit "ATC limit switch";
+
+pin in float position_fb "Position-feedback from stepgen";
+pin out float position_cmd "Sends location required";
+variable float position_req = 0; // Where we want to be
+
+pin out bit homed = false "Sends signal when ATC has finished homing";
+pin out bit homing = false "Sends signal when ATC is currently homing";
 
 pin in bit axis_homing;
 pin in bit axis_homed;
 
 option singleton yes;
+
 function _;
 license "GPL";
-
 ;;
 
 #include <stdio.h>
@@ -30,12 +34,15 @@ license "GPL";
 #define HOMING_DELAY 1;
 #define LOCKING_DELAY 1;
 
-#define TOOL_MOVE 45;
-#define CLEAR_MOVE 5;
-#define LOCK_MOVE 23;
+#define TOOL_MOVE 52;
+#define LATCHING_LIMIT 5;
+#define LOCK_MOVE 7.25;
 
-static bool homing = false;
-static bool homed = false;
+#define STEP_LOCKING = 0.001;
+#define STEP_SLOW = 0.005;
+#define STEP_NORMAL = 0.02;
+#define STEP_FAST = 0.03;
+
 static bool delay = false;
 static float timer;
 
@@ -47,6 +54,7 @@ enum events {
   HOMING_SEARCH,
   HOMING_LATCH,
   HOMING_FINISH,
+  CHANGE_CONTROL,
   CHANGE_TOOL,
   CHANGE_ADVANCE,
   CHANGE_LOCK,
@@ -56,18 +64,27 @@ enum events {
 enum events event;
 
 FUNCTION(_) {
-  if (axis_homing)
-    event = RESET;
+
+  if (tool_change) {
+    event = CHANGE_CONTROL;
+  } else {
+    tool_changed = true;
+  }
+
+  if (axis_homing) event = RESET;
 
   switch (event) {
+
   case RESET:
+
     // reset
     homed = false;
 
-    if (axis_homed)
-      event = PREPARE_HOMED;
+    if (axis_homed) event = PREPARE_HOMED;
     break;
+
   case PREPARE_HOMED:
+
     // machine is homed, register time and dispatch sleep event
     if (delay == false) {
       delay = true;
@@ -76,8 +93,11 @@ FUNCTION(_) {
       event = PREPARE_SLEEP;
     }
     break;
+
   case PREPARE_SLEEP:
+
     timer -= fperiod;
+
     if (timer <= 0) {
       timer = 0;
       delay = false;
@@ -85,31 +105,37 @@ FUNCTION(_) {
       event = HOMING_START;
     }
     break;
+
   case HOMING_START:
+
     // check if limit switch is tripped
     // if it is, release it by moving away
     if (atc_limit) {
       position_cmd = 25;
     } else {
-      position_cmd = stepgen_pos_fb + CLEAR_MOVE;
+      position_cmd = stepgen_pos_fb + 5;
 
       event = HOMING_SEARCH;
     }
     break;
+
   case HOMING_SEARCH:
+
     if (!atc_limit) {
       position_cmd = 360 + 50;
     } else {
-      position_cmd = stepgen_pos_fb + CLEAR_MOVE;
+      position_cmd = stepgen_pos_fb + 5;
 
       event = HOMING_LATCH;
     }
     break;
+
   case HOMING_LATCH:
+
     if (atc_limit) {
       position_cmd += 1;
     } else {
-      position_cmd = stepgen_pos_fb - LOCK_MOVE;
+      position_cmd = stepgen_pos_fb - 23;
       if (delay == false) {
         timer = LOCKING_DELAY;
         delay = true;
@@ -117,51 +143,83 @@ FUNCTION(_) {
       event = HOMING_FINISH;
     }
     break;
+
   case HOMING_FINISH:
+
     timer -= fperiod;
+
     if (timer <= 0) {
       timer = 0;
       delay = false;
 
       homed = true;
 
-      event = CHANGE_TOOL;
+      tool_physical = 3;
 
       rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
     }
     break;
-  case CHANGE_TOOL:
-    position_req = stepgen_pos_fb + 52;
-    event = CHANGE_ADVANCE;
+
+  case CHANGE_CONTROL:
+
+    if ( tool_physical == tool_requested ) {
+      // current tool is the tool requested, do nothing. 
+      tool_changed = true;
+      event = DEFAULT;
+    } else {
+      // lets do some tool changes 
+      event = CHANGE_TOOL;
+    }
+
     break;
+
+  case CHANGE_TOOL:
+
+    position_req = stepgen_pos_fb + TOOL_MOVE;
+    event = CHANGE_ADVANCE;
+
+    break;
+
   case CHANGE_ADVANCE:
+
     if ( stepgen_pos_fb < position_req ) {
-      if ( stepgen_pos_fb < position_req - 5 ) {
-        position_cmd += 0.03;
+      if ( stepgen_pos_fb < position_req - LATCHING_LIMIT ) {
+        position_cmd += STEP_FAST;
       } else {
-        position_cmd += 0.02;
+        position_cmd += STEP_NORMAL;
       }      
     }
+
     if ( stepgen_pos_fb >= position_req ) {
-      position_req = stepgen_pos_fb - 7.25;
+      position_req = stepgen_pos_fb - LOCK_MOVE;
       event = CHANGE_LOCK;
     }
+
     break;
+
   case CHANGE_LOCK:
+
     if ( stepgen_pos_fb > position_req ) {
-      if ( ( position_req - stepgen_pos_fb ) < 5 ) {
-        position_cmd -= 0.005;
+      if ( ( position_req - stepgen_pos_fb ) < LATCHING_LIMIT ) {
+        position_cmd -= STEP_SLOW;
       } else {
-        position_cmd -= 0.001;
-      }
-      
+        position_cmd -= STEP_LOCKING;
+      }   
     }
 
     if ( stepgen_pos_fb <= position_req ) {
-      event = CHANGE_TOOL;
+      // tool change complete, advance tool counter
+      tool_physical -= 1;
+
+      if ( tool_physical < 1 ) tool_physical = tool_physical + 8;
+
+      event = CHANGE_CONTROL;
     }
+
     break;
+
   default:
+
     break;
   }
 }

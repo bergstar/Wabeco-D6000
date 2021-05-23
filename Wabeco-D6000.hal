@@ -293,14 +293,14 @@ net machine-is-enabled        <=  motion.motion-enabled
 loadrt toolchanger
 addf toolchanger servo-thread
 
-net tool-change-request iocontrol.0.tool-change => toolchanger.toolchange
-net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.toolchanged
-net tool-number iocontrol.0.tool-prep-number => toolchanger.toolnumber
-net tool-oldnumber iocontrol.0.tool-number => toolchanger.currenttoolnumber
+net tool-change-request iocontrol.0.tool-change => toolchanger.tool-change
+net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.tool-changed
+net tool-number iocontrol.0.tool-prep-number => toolchanger.tool-requested
+net tool-oldnumber iocontrol.0.tool-number => toolchanger.tool-current
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
 
-net apos-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
-net toolchanger-stepgen-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.stepgen-pos-fb
+net tc-position-cmd toolchanger.position-cmd => hm2_7i76e.0.stepgen.02.position-cmd
+net tc-position-fb <= hm2_7i76e.0.stepgen.02.position-fb => toolchanger.position-fb
 
 #  ---estop signals---
 
@@ -321,3 +321,6 @@ net axis-homing or2.0.out => toolchanger.axis-homing
 net x-homed and2.0.in0 <= joint.0.homed
 net z-homed and2.0.in1 <= joint.1.homed
 net axis-homed and2.0.out => toolchanger.axis-homed
+
+net tc-homed-set-tool toolchanger.homed => halui.mdi-command-00
+net tc-homed-set-offset toolchanger.homed => halui.mdi-command-01
