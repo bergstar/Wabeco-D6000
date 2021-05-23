@@ -232,7 +232,7 @@ FUNCTION(_) {
 
       if ( tool_physical < 1 ) tool_physical = tool_physical + 8;
 
-      event = CHANGE_CONTROL;
+      event = CHANGE_PROGRESS;
     }
 
     break;
