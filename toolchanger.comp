@@ -38,11 +38,11 @@ license "GPL";
 
 #define TOOL_MOVE 52;
 #define LATCHING_MOVE 5
-#define LOCK_MOVE 7.25;
+#define LOCK_MOVE 7.1;
 
 #define STEP_LOCKING 0.001;
 #define STEP_SLOW 0.005;
-#define STEP_NORMAL 0.02;
+#define STEP_NORMAL 0.01;
 #define STEP_FAST 0.03;
 
 static bool delay = false;
