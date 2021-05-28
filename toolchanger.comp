@@ -80,7 +80,7 @@ FUNCTION(_) {
   if ( axis_homing ) event = RESET;
 
   if ( tool_change && homed ) {      
-    if ( !tool_process ) {
+    if ( !tool_process && !tool_changed ) {
       event = CHANGE_INIT;
     }
   } 
