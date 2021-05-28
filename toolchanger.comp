@@ -11,7 +11,10 @@ pin out s32 tool_target = 0; // Reflects requested tool number
 
 pin out bit tool_locking = false; // Indicates that tool is about to get locked
 pin out bit tool_locked = false; 
-pin out bit atc_active = false; 
+pin out bit tool_process = false; 
+
+pin out s32 event_step = 0; 
+
 
 pin in bit atc_limit "ATC limit switch";
 
@@ -77,8 +80,10 @@ FUNCTION(_) {
 
   if ( axis_homing ) event = RESET;
 
-  if ( tool_change && homed && !atc_active ) {      
-    event = CHANGE_INIT;
+  if ( tool_change && homed ) {      
+    if ( !tool_process ) {
+      event = CHANGE_INIT;
+    }
   } 
   
   if( !tool_change ) {
@@ -89,6 +94,8 @@ FUNCTION(_) {
 
   case RESET:
 
+    event_step = 1;
+
     // reset
     homed = 0;
 
@@ -97,6 +104,8 @@ FUNCTION(_) {
     break;
 
   case PREPARE_HOMED:
+
+    event_step = 2;
 
     // machine is homed, register time and dispatch sleep event
     if (delay == false) {
@@ -109,6 +118,8 @@ FUNCTION(_) {
     break;
 
   case PREPARE_SLEEP:
+
+  event_step = 3;
 
     timer -= fperiod;
 
@@ -123,6 +134,8 @@ FUNCTION(_) {
 
   case HOMING_START:
 
+    event_step = 4;
+
     // check if limit switch is tripped
     // if it is, release it by moving away
     if (atc_limit) {
@@ -134,8 +147,8 @@ FUNCTION(_) {
     break;
 
   case HOMING_SEARCH:
-    
-    atc_active = 1;
+
+    event_step = 5;
 
     if (!atc_limit) {
       position_cmd = 360 + 50;
@@ -148,6 +161,8 @@ FUNCTION(_) {
     break;
 
   case HOMING_LATCH:
+
+    event_step = 6;
 
     if (atc_limit) {
       position_cmd += 1;
@@ -164,6 +179,8 @@ FUNCTION(_) {
 
   case HOMING_FINISH:
 
+    event_step = 7;
+
     timer -= fperiod;
 
     if (timer <= 0) {
@@ -175,8 +192,6 @@ FUNCTION(_) {
       
       tool_locked = 1;
 
-      atc_active = 0;
-
       tool_physical = 2;
 
       event = DEFAULT;
@@ -184,8 +199,8 @@ FUNCTION(_) {
     break;
 
   case CHANGE_INIT:
-    
-    atc_active = 1;
+
+    event_step = 8;
     
     tool_target = tool_requested;
 
@@ -195,6 +210,8 @@ FUNCTION(_) {
 
   case CHANGE_CONTROL:  
 
+    event_step = 9;
+
     if ( tool_physical == tool_target ) {
       // current tool is the tool requested, do nothing. 
       tool_changed = 1;
@@ -202,17 +219,22 @@ FUNCTION(_) {
       tool_target = 0;
 
       tool_locked = 1;
-
-      atc_active = 0;
+      
+      tool_process = 0;
 
       event = DEFAULT;
     } else {
+      
+      tool_process = 1;
+
       event = CHANGE_PROGRESS;
     }
 
     break;
 
   case CHANGE_PROGRESS:
+
+    event_step = 10;
 
     if ( remaining(tool_physical, tool_target) == 1 ) {
       tool_locking = true;
@@ -226,6 +248,8 @@ FUNCTION(_) {
 
   case CHANGE_TOOL: 
 
+    event_step = 11;
+
     if ( tool_locked == true ) {
       position_req = position_fb + TOOL_MOVE;      
     } else {
@@ -238,6 +262,8 @@ FUNCTION(_) {
     break;
 
   case CHANGE_ADVANCE:
+
+    event_step = 12;
       
     if ( position_fb < position_req ) {
       if ( position_fb < position_req - LATCHING_MOVE ) {
@@ -265,6 +291,8 @@ FUNCTION(_) {
 
   case CHANGE_LOCK:
 
+    event_step = 13;
+
     if ( position_fb > position_req ) {
       if ( ( position_req - position_fb ) < LATCHING_MOVE ) {
         position_cmd -= STEP_SLOW;
@@ -283,6 +311,9 @@ FUNCTION(_) {
     break;
 
   case CHANGE_COMPLETE:
+
+    event_step = 14;
+
     // tool change complete, advance tool counter
     tool_physical += 1;
 
@@ -293,6 +324,8 @@ FUNCTION(_) {
     break;
 
   default:
+
+    event_step = 15;
     
     break;
   }
