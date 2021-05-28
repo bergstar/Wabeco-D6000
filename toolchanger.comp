@@ -3,7 +3,7 @@ component toolchanger "This component controls the Boxford 240 Lathe Auto Tool "
 pin in bit enable = false "Toolchanger enable signal";
 
 pin in bit tool_change "Receives signal from M6 that tool change required";
-pin out bit tool_changed = false "Sends signal when tool change finished";
+pin out bit tool_changed "Sends signal when tool change finished";
 pin in s32 tool_requested "Receives Tx data from M6 (tool number requested) Only allows 1-8";
 pin in s32 tool_current "Receives old tool number";
 pin out s32 tool_physical = 0; // Reflects current locked tool in ATC
@@ -83,6 +83,7 @@ FUNCTION(_) {
 
     // reset
     homed = false;
+    tool_changed = 0;
 
     if (axis_homed) event = PREPARE_HOMED;
 
@@ -174,10 +175,12 @@ FUNCTION(_) {
     break;
 
   case CHANGE_CONTROL:
-
+    
+    tool_changed = 0;
+    
     if ( tool_physical == tool_requested ) {
       // current tool is the tool requested, do nothing. 
-      tool_changed = true;
+      tool_changed = 1;
       event = DEFAULT;
     } else {
       tool_target = tool_requested;
@@ -191,7 +194,7 @@ FUNCTION(_) {
 
     if ( tool_physical == tool_target ) {
       // current tool is the tool requested
-      tool_changed = true;
+      tool_changed = 1;
       tool_target = 0;
       event = DEFAULT;
     } else {
@@ -271,6 +274,7 @@ FUNCTION(_) {
     break;
 
   default:
+    tool_changed = 0;
 
     break;
   }
