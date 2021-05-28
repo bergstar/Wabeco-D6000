@@ -1,1 +1,1 @@
-pin+toolchanger.tool-physical pin+toolchanger.tool-current pin+toolchanger.tool-changed pin+toolchanger.tool-change pin+toolchanger.tool-requested
+pin+toolchanger.tool-physical pin+toolchanger.tool-current pin+toolchanger.tool-changed pin+toolchanger.tool-change pin+toolchanger.tool-requested pin+toolchanger.atc-active pin+toolchanger.atc-limit
