@@ -81,7 +81,7 @@ FUNCTION(_) {
     event = CHANGE_INIT;
   } 
   
-  if( !tool_change )
+  if( !tool_change ) {
     tool_changed = 0; // reset once toolchange flag reset by system
   }
 
