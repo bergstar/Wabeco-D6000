@@ -216,19 +216,20 @@ FUNCTION(_) {
 
     break;
 
-  case CHANGE_TOOL:
+  case CHANGE_TOOL: 
 
-    position_req = position_fb + TOOL_MOVE;      
-
-    // we need to move less since tool is not locked
-    if ( tool_locked == false ) position_req = position_req - LOCK_MOVE;   
+    if ( tool_locked == true ) {
+      position_req = position_fb + TOOL_MOVE;      
+    } else {
+      // we need to move less since tool is not locked
+      position_req = position_fb + TOOL_MOVE - LOCK_MOVE;   
+    }
 
     event = CHANGE_ADVANCE;
 
     break;
 
   case CHANGE_ADVANCE:
-
       
     if ( position_fb < position_req ) {
       if ( position_fb < position_req - LATCHING_MOVE ) {
@@ -238,17 +239,19 @@ FUNCTION(_) {
       }      
     }
 
-    if ( tool_locking == true ) {
-      if ( position_fb >= position_req ) {
+    // necessery move has been complete, decide what to do next
+    if ( position_fb >= position_req ) {
+      if ( tool_locking == true ) {
         position_req = position_fb - LOCK_MOVE - LOCK_STOP;
-        event = CHANGE_LOCK;
-      }
-    } else {
-      // moved tool without locking it
-      tool_locked = false;
 
-      event = CHANGE_COMPLETE;
-    }
+        event = CHANGE_LOCK;
+      } else {
+        // moved tool without locking it
+        tool_locked = false;
+
+        event = CHANGE_COMPLETE;
+      }
+    }  
 
     break;
 
