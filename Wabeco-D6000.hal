@@ -294,7 +294,7 @@ loadrt toolchanger
 addf toolchanger servo-thread
 
 net tool-change-request iocontrol.0.tool-change => toolchanger.tool-change
-
+net tool-change-confirmed iocontrol.0.tool-changed <= toolchanger.tool-changed
 net tool-number iocontrol.0.tool-prep-number => toolchanger.tool-requested
 net tool-oldnumber iocontrol.0.tool-number => toolchanger.tool-current
 net tool-prepare-loopback iocontrol.0.tool-prepare => iocontrol.0.tool-prepared
