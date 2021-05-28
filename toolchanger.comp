@@ -12,6 +12,7 @@ pin out s32 tool_target = 0; // Reflects requested tool number
 pin out s32 tool_locking = false; // Indicates that tool is about to get locked
 pin out s32 tool_locked = false; 
 
+pin out s32 atc_active = false; 
 pin in bit atc_limit "ATC limit switch";
 
 pin in float position_fb "Position-feedback from stepgen";
@@ -73,9 +74,11 @@ enum events event;
 
 FUNCTION(_) {
 
-  if (axis_homing) event = RESET;
+  if ( axis_homing ) event = RESET;
 
-  if ( tool_change && homed ) event = CHANGE_CONTROL;
+  if ( tool_change && homed && !atc_active ) {      
+    event = CHANGE_CONTROL;
+  }
 
   switch (event) {
 
@@ -84,6 +87,7 @@ FUNCTION(_) {
     // reset
     homed = false;
     tool_changed = 0;
+    atc_active = false;
 
     if (axis_homed) event = PREPARE_HOMED;
 
@@ -168,19 +172,20 @@ FUNCTION(_) {
 
       tool_physical = 2;
 
-      rtapi_print_msg(RTAPI_MSG_ERR, "Homed");
-      
       event = DEFAULT;
     }
     break;
 
   case CHANGE_CONTROL:
-    
+  
     tool_changed = 0;
-    
+    atc_active = true;
+
     if ( tool_physical == tool_requested ) {
       // current tool is the tool requested, do nothing. 
       tool_changed = 1;
+      atc_active = false;
+  
       event = DEFAULT;
     } else {
       tool_target = tool_requested;
@@ -195,6 +200,8 @@ FUNCTION(_) {
     if ( tool_physical == tool_target ) {
       // current tool is the tool requested
       tool_changed = 1;
+      atc_active = false;
+  
       tool_target = 0;
       event = DEFAULT;
     } else {
@@ -222,6 +229,7 @@ FUNCTION(_) {
 
   case CHANGE_ADVANCE:
 
+      
     if ( position_fb < position_req ) {
       if ( position_fb < position_req - LATCHING_MOVE ) {
         position_cmd += STEP_FAST;
