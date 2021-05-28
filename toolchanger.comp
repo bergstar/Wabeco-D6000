@@ -189,6 +189,8 @@ FUNCTION(_) {
     
     tool_target = tool_requested;
 
+    event = CHANGE_CONTROL;
+
     break;
 
   case CHANGE_CONTROL:  
