@@ -50,6 +50,7 @@ license "GPL";
 
 static bool delay = false;
 static float timer;
+static int remaining(const int current, const int target);
 
 enum events {
   RESET,
@@ -64,6 +65,7 @@ enum events {
   CHANGE_TOOL,
   CHANGE_ADVANCE,
   CHANGE_LOCK,
+  CHANGE_COMPLETE,
   DEFAULT
 };
 
@@ -275,7 +277,7 @@ FUNCTION(_) {
 }
 
 /* function descripgion */
-int remaining(int current, int target) {
+int remaining(const int current, const int target) {
   int result;
 
   result = 8 - current + target;
