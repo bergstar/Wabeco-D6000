@@ -86,8 +86,8 @@ FUNCTION(_) {
   } 
   
   if( !tool_change ) {
-    tool_process = 0;
-    tool_changed = 0; // reset once toolchange flag reset by system
+    tool_process = false;
+    tool_changed = false; // reset once toolchange flag reset by system
   }
 
   switch (event) {
@@ -188,10 +188,10 @@ FUNCTION(_) {
 
       delay = false;
 
-      homed = 1;
+      homed = true;
       
-      tool_locked = 1;
-
+      tool_locked = true;
+      
       tool_physical = 2;
 
       event = DEFAULT;
@@ -204,13 +204,13 @@ FUNCTION(_) {
     
     if ( tool_physical == tool_requested ) {
       // current tool is the tool requested, do nothing. 
-      tool_changed = 1;
+      tool_changed = true;
       
       event = DEFAULT;
     } else {
       tool_target = tool_requested;
 
-      tool_process = 1;
+      tool_process = true;
 
       event = CHANGE_CONTROL;
     }
@@ -222,10 +222,8 @@ FUNCTION(_) {
 
     if ( tool_physical == tool_target ) {
       // current tool is the tool requested, do nothing. 
-      tool_changed = 1;
-      
-      tool_target = 0;
-      
+      tool_changed = true;
+         
       event = DEFAULT;
     } else {
       
@@ -243,6 +241,7 @@ FUNCTION(_) {
     } else {
       tool_locking = false;
     }
+
     // add check for lock move
     event = CHANGE_TOOL;
 
@@ -253,10 +252,9 @@ FUNCTION(_) {
     event_step = 11;
 
     if ( tool_locked == true ) {
-      position_req = position_fb + TOOL_MOVE;      
+      position_req = position_fb + 52;      
     } else {
-      // we need to move less since tool is not locked
-      position_req = position_fb + TOOL_MOVE - LOCK_MOVE;   
+      position_req = position_fb + 45;   
     }
 
     event = CHANGE_ADVANCE;
@@ -266,13 +264,18 @@ FUNCTION(_) {
   case CHANGE_ADVANCE:
 
     event_step = 12;
-      
+    
+    // tool is not in position, lets move forward
     if ( position_fb < position_req ) {
-      if ( position_fb < position_req - LATCHING_MOVE ) {
-        position_cmd += STEP_FAST;
+      if ( tool_locking ) {
+        if ( position_fb < ( position_req - LATCHING_MOVE ) ) {
+          position_cmd += STEP_FAST;
+        } else {
+          position_cmd += STEP_NORMAL;
+        }      
       } else {
-        position_cmd += STEP_NORMAL;
-      }      
+        position_cmd += STEP_FAST;
+      }
     }
 
     // necessery move has been complete, decide what to do next
@@ -305,7 +308,7 @@ FUNCTION(_) {
 
     if ( position_fb <= position_req ) {
       // moved tool and locked it
-      tool_locked = 1;
+      tool_locked = true;
 
       event = CHANGE_COMPLETE;
     }
