@@ -1,1 +1,20 @@
-pin+toolchanger.tool-physical pin+toolchanger.tool-current pin+toolchanger.tool-changed pin+toolchanger.tool-change pin+toolchanger.tool-requested pin+toolchanger.tool-process pin+toolchanger.atc-limit pin+toolchanger.axis-homed pin+toolchanger.axis-homing pin+toolchanger.enable pin+toolchanger.homed pin+toolchanger.homing pin+toolchanger.position-cmd pin+toolchanger.position-fb pin+toolchanger.tool-locked pin+toolchanger.tool-locking pin+toolchanger.tool-target
+# halshow watchlist created Fri May 28 18:45:18 CEST 2021
+
+pin+toolchanger.tool-physical
+pin+toolchanger.tool-current
+pin+toolchanger.tool-changed
+pin+toolchanger.tool-change
+pin+toolchanger.tool-requested
+pin+toolchanger.tool-process
+pin+toolchanger.atc-limit
+pin+toolchanger.axis-homed
+pin+toolchanger.axis-homing
+pin+toolchanger.enable
+pin+toolchanger.homed
+pin+toolchanger.homing
+pin+toolchanger.position-cmd
+pin+toolchanger.position-fb
+pin+toolchanger.tool-locked
+pin+toolchanger.tool-locking
+pin+toolchanger.tool-target
+pin+toolchanger.event-step

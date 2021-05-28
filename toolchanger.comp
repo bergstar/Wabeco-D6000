@@ -87,6 +87,7 @@ FUNCTION(_) {
   } 
   
   if( !tool_change ) {
+    tool_process = 0;
     tool_changed = 0; // reset once toolchange flag reset by system
   }
 
@@ -204,6 +205,8 @@ FUNCTION(_) {
     
     tool_target = tool_requested;
 
+    tool_process = 1;
+
     event = CHANGE_CONTROL;
 
     break;
@@ -220,13 +223,9 @@ FUNCTION(_) {
 
       tool_locked = 1;
       
-      tool_process = 0;
-
       event = DEFAULT;
     } else {
       
-      tool_process = 1;
-
       event = CHANGE_PROGRESS;
     }
 
