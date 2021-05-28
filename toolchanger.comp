@@ -15,7 +15,6 @@ pin out bit tool_process = false;
 
 pin out s32 event_step = 0; 
 
-
 pin in bit atc_limit "ATC limit switch";
 
 pin in float position_fb "Position-feedback from stepgen";
@@ -203,12 +202,18 @@ FUNCTION(_) {
 
     event_step = 8;
     
-    tool_target = tool_requested;
+    if ( tool_physical == tool_requested ) {
+      // current tool is the tool requested, do nothing. 
+      tool_changed = 1;
+      
+      event = DEFAULT;
+    } else {
+      tool_target = tool_requested;
 
-    tool_process = 1;
+      tool_process = 1;
 
-    event = CHANGE_CONTROL;
-
+      event = CHANGE_CONTROL;
+    }
     break;
 
   case CHANGE_CONTROL:  
@@ -220,8 +225,6 @@ FUNCTION(_) {
       tool_changed = 1;
       
       tool_target = 0;
-
-      tool_locked = 1;
       
       event = DEFAULT;
     } else {
