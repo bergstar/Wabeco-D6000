@@ -41,7 +41,8 @@ license "GPL";
 #define HOMING_DELAY 1;
 #define LOCKING_DELAY 1;
 
-#define TOOL_MOVE 52; // tool move including moving away from the lock 
+#define TOOL_MOVE 52; // tool move including moving away from the lock
+#define TOOL_CLEARMOVE 44.75; 
 #define LATCHING_MOVE 5 // threshold on when to start the slow move
 #define LOCK_MOVE 7; // move in oposit direction, locking the tool
 #define LOCK_STOP 0.1; // slamming into physical stop
@@ -252,9 +253,9 @@ FUNCTION(_) {
     event_step = 11;
 
     if ( tool_locked == true ) {
-      position_req = position_fb + 52;      
+      position_req = position_fb + TOOL_MOVE;      
     } else {
-      position_req = position_fb + 45;   
+      position_req = position_fb + TOOL_CLEARMOVE;   
     }
 
     event = CHANGE_ADVANCE;
